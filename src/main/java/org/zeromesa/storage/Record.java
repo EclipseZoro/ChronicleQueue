@@ -28,6 +28,7 @@ public record Record(long offset, byte[] payload) {
         return buffer;
     }
 
+    // validate header boundary and checksum integrity and extract raw payload
     public static byte[] deserialize(ByteBuffer buffer) {
         byte magic = buffer.get();
         if (magic != MAGIC_BYTE) {
