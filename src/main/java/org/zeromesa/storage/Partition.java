@@ -150,6 +150,23 @@ public class Partition implements AutoCloseable {
         return 0;
     }
 
+    /**
+     * Zero-Copy slice transfer starting at targetOffset directly to a network SocketChannel.
+     */
+    public long transferZeroCopy(long targetOffset, long maxBytes, java.nio.channels.WritableByteChannel target) throws IOException {
+        if (targetOffset < 0 || targetOffset >= nextOffset.get()) {
+            return 0L;
+        }
+        Map.Entry<Long, SegmentBundle> entry = segments.floorEntry(targetOffset);
+        if (entry == null) {
+            return 0L;
+        }
+        SegmentBundle bundle = entry.getValue();
+        int relativeTarget = (int) (targetOffset - bundle.log().getBaseOffset());
+        long physicalPos = bundle.index().lookup(relativeTarget);
+        return bundle.log().transferTo(physicalPos, maxBytes, target);
+    }
+
     public int getSegmentCount() {
         return segments.size();
     }

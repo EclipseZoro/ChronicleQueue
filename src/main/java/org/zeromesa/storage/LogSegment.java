@@ -111,7 +111,18 @@ public class LogSegment implements AutoCloseable {
         }
         return new RawFrame(payloadBuffer.array(), Record.HEADER_SIZE + payloadLength);
     }
-
+    /**
+     * Zero-Copy transfer directly from OS Page Cache to target channel (e.g., SocketChannel)
+     * via kernel sendfile / TransmitFile without copying into JVM heap.
+     */
+    public long transferTo(long physicalPosition, long maxBytes, java.nio.channels.WritableByteChannel target) throws IOException {
+        long available = currentPhysicalOffset.get() - physicalPosition;
+        if (available <= 0) {
+            return 0L;
+        }
+        long count = Math.min(available, maxBytes);
+        return channel.transferTo(physicalPosition, count, target);
+    }
     public long getBaseOffset(){
         return baseOffset;
     }
