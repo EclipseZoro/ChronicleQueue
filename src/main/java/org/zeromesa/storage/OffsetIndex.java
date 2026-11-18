@@ -101,6 +101,13 @@ public class OffsetIndex implements AutoCloseable {
     public int getEntriesCount() {
         return entriesCount.get();
     }
+    public int getRelativeOffsetAtSlot(int slot) {
+        return mappedBuffer.getInt(slot * IndexEntry.ENTRY_SIZE_BYTES);
+    }
+
+    public long getPhysicalPositionAtSlot(int slot) {
+        return mappedBuffer.getLong((slot * IndexEntry.ENTRY_SIZE_BYTES) + 4);
+    }
 
     @Override
     public void close() throws IOException {

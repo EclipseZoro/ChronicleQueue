@@ -78,6 +78,40 @@ public class LogSegment implements AutoCloseable {
 
     }
 
+    public record RawFrame(byte[] payload, int frameSizeBytes) {}
+
+    public RawFrame readFrame(long physicalPosition) throws IOException {
+        if (physicalPosition >= currentPhysicalOffset.get()) {
+            return null;
+        }
+
+        ByteBuffer headerBuffer = ByteBuffer.allocate(Record.HEADER_SIZE);
+        int bytesRead = channel.read(headerBuffer, physicalPosition);
+        if (bytesRead < Record.HEADER_SIZE) {
+            return null;
+        }
+        headerBuffer.flip();
+
+        byte magic = headerBuffer.get();
+        if (magic != Record.MAGIC_BYTE) {
+            throw new CorruptRecordException("Corrupt record header at postion: " +  physicalPosition);
+
+        }
+        int checkSum = headerBuffer.getInt();
+        int payloadLength = headerBuffer.getInt();
+
+        ByteBuffer payloadBuffer = ByteBuffer.allocate(payloadLength);
+        channel.read(payloadBuffer, physicalPosition + Record.HEADER_SIZE);
+        payloadBuffer.flip();
+
+        CRC32 crc = new CRC32();
+        crc.update(payloadBuffer.array());
+        if ((int) crc.getValue() != checkSum) {
+            throw new CorruptRecordException("CRC32 mismatch at postion: " + physicalPosition);
+        }
+        return new RawFrame(payloadBuffer.array(), Record.HEADER_SIZE + payloadLength);
+    }
+
     public long getBaseOffset(){
         return baseOffset;
     }
