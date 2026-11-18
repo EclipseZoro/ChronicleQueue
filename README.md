@@ -1,4 +1,4 @@
-# ChronicleQueue (ZeroMesa)
+# ChronoLog
 
 > A high-throughput, low-level streaming storage engine and message broker built from scratch in **Java 21**, with no runtime dependencies.
 
