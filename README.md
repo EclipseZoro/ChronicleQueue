@@ -2,7 +2,7 @@
 
 > A high-throughput, low-level streaming storage engine and message broker built from scratch in **Java 21**, with no runtime dependencies.
 
-ChronicleQueue combines the storage design of a Kafka-style commit log with the routing model of an AMQP broker such as RabbitMQ. Producers publish events over a custom binary TCP protocol. Events pass through a lock-free ring buffer, are persisted to a segmented append-only write-ahead log (WAL), and are routed to named consumer groups through a topic-routing trie. Consumers can pull raw log bytes straight from the OS page cache using zero-copy `FileChannel.transferTo()`.
+ChronoLog combines the storage design of a Kafka-style commit log with the routing model of an AMQP broker such as RabbitMQ. Producers publish events over a custom binary TCP protocol. Events pass through a lock-free ring buffer, are persisted to a segmented append-only write-ahead log (WAL), and are routed to named consumer groups through a topic-routing trie. Consumers can pull raw log bytes straight from the OS page cache using zero-copy `FileChannel.transferTo()`.
 
 The project is meant as a deep dive into the "mechanical sympathy" techniques behind modern messaging systems: sequential I/O, memory-mapped sparse indexes, cache-line padding, CAS-based concurrency, memory-ordering fences, virtual threads and kernel `sendfile`.
 
